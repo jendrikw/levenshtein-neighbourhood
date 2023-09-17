@@ -1,0 +1,22 @@
+[package]
+name = "codegolf-levenst"
+version = "0.1.0"
+edition = "2021"
+
+[profile.dev]
+#lto = true
+#opt-level = 3
+#overflow-checks = false
+
+# for flamegraph
+[profile.release]
+debug = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#triple_accel = "0.4.0"
+#itertools = "0.11.0"
+#bitap = "0.2.0"
+#levenshtein_automata = "0.2.1"
+#fuzzy_trie = "1.2.0"
