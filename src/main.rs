@@ -26,6 +26,7 @@ def countFixedDistance(s: str, k: int) -> int:
     return len(valid)
  */
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
+use std::collections::btree_map::Entry;
 use std::time::Instant;
 
 fn count_fixed_distance(s: &str, k: u32) -> usize {
@@ -39,13 +40,20 @@ fn count_fixed_distance(s: &str, k: u32) -> usize {
         for next_gen in [
             Box::new((0..bit_count).map(|e| (current >> (e + 1) << e) + current % (1 << e))) as Box<dyn Iterator<Item=i32>>,
             Box::new((0..bit_count).map(|e| current ^ (1 << e))),
-            Box::new((0..bit_count).flat_map(|e| [0, 1].map(|b| ((current >> e << 1 | b) << e) + current % (1 << e))))
+            Box::new((0..bit_count).map(|e| (current >> e << 1 << e) + current % (1 << e))),
+            Box::new((0..bit_count).map(|e| ((current >> e << 1 | 1) << e) + current % (1 << e))),
         ] {
             for next in next_gen {
-                if distances.contains_key(&next) {
-                    continue;
+                // if distances.contains_key(&next) {
+                //     continue;
+                // }
+                // distances.insert(next, next_dist);
+                match distances.entry(next) {
+                    Entry::Vacant(ve) => {
+                        ve.insert(next_dist);
+                    }
+                    Entry::Occupied(_) => continue,
                 }
-                distances.insert(next, next_dist);
                 if next_dist < k {
                     queue.push_back((next, next_bit_count));
                 } else {
@@ -63,7 +71,7 @@ fn main() {
     let mut s = String::with_capacity(32);
     s.push('0');
     let mut v = 0;
-    while s.len() <= 11 { // approx 1 minute for profiling
+    while s.len() <= 12 { // approx 1 minute for profiling
         for k in 1..(s.len() + 1) {
             println!("{} {} {}", s.len(), k, count_fixed_distance(&s, k as u32));
         }

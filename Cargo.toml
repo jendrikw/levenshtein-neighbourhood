@@ -20,3 +20,4 @@ debug = true
 #bitap = "0.2.0"
 #levenshtein_automata = "0.2.1"
 #fuzzy_trie = "1.2.0"
+seahash = "4.1.0"
