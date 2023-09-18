@@ -1,47 +1,20 @@
-/*
-from collections import deque
-
-def countFixedDistance(s: str, k: int) -> int:
-    n = int('1' + s, 2)
-    distances: dict[int, int] = {n: 0}
-    queue = deque(((n, len(s)),))
-    valid: set[int] = set()
-    while len(queue) > 0:
-        current, bit_count = queue.popleft()
-        next_dist = distances[current] + 1
-        next_bit_count = bit_count - 1
-        for next_gen in (
-            ((current >> e + 1 << e) + current % (1 << e) for e in range(bit_count)),
-            (current ^ (1 << e) for e in range(bit_count)),
-            (((current >> e << 1 | b) << e) + current % (1 << e) for b in (0, 1) for e in range(bit_count + 1)),
-        ):
-          for next in next_gen:
-              if next in distances: continue
-              distances[next] = next_dist
-              if next_dist < k:
-                  queue.append((next, next_bit_count))
-              else:
-                  valid.add(next)
-          next_bit_count += 1
-    return len(valid)
- */
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::collections::btree_map::Entry;
 use std::time::Instant;
-
-use fasthash::sea::Hash64;
 
 fn count_fixed_distance(s: &str, k: u32) -> usize {
     let n = i32::from_str_radix(&format!("1{s}"), 2).unwrap();
     let mut distances = BTreeMap::from([(n, 0)]);
     let mut queue = VecDeque::from([(n, s.len())]);
     let mut valid = BTreeSet::new();
+    // while let Some((current, bit_count)) = queue.pop_front() {
     while let Some((current, bit_count)) = queue.pop_front() {
         let next_dist = distances.get(&current).unwrap() + 1;
+        let mut pow = 0;
         for e in 0..bit_count {
             let left = current >> e;
             let left_1 = left << 1;
-            let pow = 1 << e;
+            pow = 1 << e;
             let right = current % pow;
             let bp1 = bit_count + 1;
             for (next, next_bit_count) in [
@@ -62,19 +35,19 @@ fn count_fixed_distance(s: &str, k: u32) -> usize {
                     valid.insert(next);
                 }
             }
+        }
 
-            for next in [pow << 2 | current, 3 << bit_count ^ current] {
-                match distances.entry(next) {
-                    Entry::Vacant(ve) => {
-                        ve.insert(next_dist);
-                    }
-                    Entry::Occupied(_) => continue,
+        for next in [pow << 2 | current, 3 << bit_count ^ current] {
+            match distances.entry(next) {
+                Entry::Vacant(ve) => {
+                    ve.insert(next_dist);
                 }
-                if next_dist < k {
-                    queue.push_back((next, bit_count + 1));
-                } else {
-                    valid.insert(next);
-                }
+                Entry::Occupied(_) => continue,
+            }
+            if next_dist < k {
+                queue.push_back((next, bit_count + 1));
+            } else {
+                valid.insert(next);
             }
         }
     }
@@ -86,7 +59,7 @@ fn main() {
     let mut s = String::with_capacity(32);
     s.push('0');
     let mut v = 0;
-    while s.len() <= 11 { // approx 1 minute for profiling
+    while s.len() <= 11 { // approx 2 minutes for profiling
         for k in 1..(s.len() + 1) {
             println!("{} {} {}", s.len(), k, count_fixed_distance(&s, k as u32));
         }
@@ -95,4 +68,9 @@ fn main() {
         println!("{}", s)
     }
     println!("{} seconds", start.elapsed().as_secs_f32());
+    // let mut res: Vec<_> = count_fixed_distance("1001100110", 8).into_iter().collect();
+    // dbg!(count_fixed_distance("1001100110", 8));
+    // res.sort();
+    // dbg!(res.len());
+    // dbg!(res);
 }
