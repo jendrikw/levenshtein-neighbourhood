@@ -1,10 +1,14 @@
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
-use std::collections::btree_map::Entry;
+use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
+use std::collections::hash_map::Entry;
 use std::time::Instant;
+use fasthash::xx::Hash64;
+use nohash_hasher::NoHashHasher;
 
 fn count_fixed_distance(s: &str, k: u32) -> usize {
     let n = i32::from_str_radix(&format!("1{s}"), 2).unwrap();
-    let mut distances = BTreeMap::from([(n, 0)]);
+    // let mut distances = BTreeMap::from([(n, 0)]);
+    let mut distances = HashMap::with_capacity_and_hasher(1 << (s.len() + k as usize), NoHashHasher);
+    distances.insert(n, 0);
     let mut queue = VecDeque::from([(n, s.len())]);
     let mut valid = BTreeSet::new();
     // while let Some((current, bit_count)) = queue.pop_front() {
@@ -59,7 +63,7 @@ fn main() {
     let mut s = String::with_capacity(32);
     s.push('0');
     let mut v = 0;
-    while s.len() <= 11 { // approx 2 minutes for profiling
+    while s.len() <= 12 { // approx 2 minutes for profiling
         for k in 1..(s.len() + 1) {
             println!("{} {} {}", s.len(), k, count_fixed_distance(&s, k as u32));
         }
