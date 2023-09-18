@@ -29,6 +29,8 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
 use std::collections::btree_map::Entry;
 use std::time::Instant;
 
+use fasthash::sea::Hash64;
+
 fn count_fixed_distance(s: &str, k: u32) -> usize {
     let n = i32::from_str_radix(&format!("1{s}"), 2).unwrap();
     let mut distances = BTreeMap::from([(n, 0)]);
@@ -71,7 +73,7 @@ fn main() {
     let mut s = String::with_capacity(32);
     s.push('0');
     let mut v = 0;
-    while s.len() <= 12 { // approx 1 minute for profiling
+    while s.len() <= 11 { // approx 1 minute for profiling
         for k in 1..(s.len() + 1) {
             println!("{} {} {}", s.len(), k, count_fixed_distance(&s, k as u32));
         }
