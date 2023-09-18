@@ -1,17 +1,18 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
+#![warn(clippy::all)]
+
+use std::collections::VecDeque;
 use std::collections::hash_map::Entry;
 use std::time::Instant;
-use fasthash::xx::Hash64;
-use nohash_hasher::NoHashHasher;
+
+use nohash_hasher::{IntMap, IntSet};
 
 fn count_fixed_distance(s: &str, k: u32) -> usize {
     let n = i32::from_str_radix(&format!("1{s}"), 2).unwrap();
-    // let mut distances = BTreeMap::from([(n, 0)]);
-    let mut distances = HashMap::with_capacity_and_hasher(1 << (s.len() + k as usize), NoHashHasher);
+    let mut distances = IntMap::with_capacity_and_hasher(1 << (s.len() + k as usize), Default::default());
     distances.insert(n, 0);
     let mut queue = VecDeque::from([(n, s.len())]);
-    let mut valid = BTreeSet::new();
-    // while let Some((current, bit_count)) = queue.pop_front() {
+    // capacity is just experimentation
+    let mut valid = IntSet::with_capacity_and_hasher(1 << (k + 1), Default::default());
     while let Some((current, bit_count)) = queue.pop_front() {
         let next_dist = distances.get(&current).unwrap() + 1;
         let mut pow = 0;
@@ -72,9 +73,4 @@ fn main() {
         println!("{}", s)
     }
     println!("{} seconds", start.elapsed().as_secs_f32());
-    // let mut res: Vec<_> = count_fixed_distance("1001100110", 8).into_iter().collect();
-    // dbg!(count_fixed_distance("1001100110", 8));
-    // res.sort();
-    // dbg!(res.len());
-    // dbg!(res);
 }
